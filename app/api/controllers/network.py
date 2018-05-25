@@ -4,6 +4,7 @@ from flask_jwt import jwt_required
 from app.api.models.LXDModule import LXDModule
 from app.api.models.LXCContainer import LXCContainer
 from app.api.models.LXCNetwork import LXCNetwork
+from app.api.models.OpenvSwitchNetwork import OpenvSwitchNetwork
 from app.api.schemas.networkSchema import doValidate
 from app.api.utils import response
 
@@ -21,7 +22,7 @@ def network():
 @network_api.route('/<string:name>')
 @jwt_required()
 def networkInfo(name):
-    network = LXCNetwork({'name': name})
+    network = OpenvSwitchNetwork({'name': name})
     mainConfig = network.info()
     if mainConfig['error']:
         return response.replyFailed(message=mainConfig['message'])
@@ -36,9 +37,10 @@ def updateNetwork(name):
     if validation:
         return response.replyFailed(message=validation.message)
 
+    input['openvswitch'] = False
     input['IPv6_ENABLED'] = False
 
-    network = LXCNetwork({'name': name})
+    network = OpenvSwitchNetwork({'name': name})
     network.updateNetwork(input, name)
 
     mainConfig = network.info()
@@ -54,8 +56,9 @@ def creatNetwork(name):
     if validation:
         return response.replyFailed(message=validation.message)
 
+    input['openvswitch'] = True
     input['IPv6_ENABLED'] = False
-    network = LXCNetwork({'name': name})
+    network = OpenvSwitchNetwork({'name': name})
     network.createNetwork(input, name)
 
     mainConfig = network.info()
@@ -64,7 +67,7 @@ def creatNetwork(name):
 @network_api.route('/<string:name>', methods=['DELETE'])
 @jwt_required()
 def deleteNetwork(name):
-    network = LXCNetwork({'name': name})
+    network = OpenvSwitchNetwork({'name': name})
     network.deleteNetwork()
 
     client = LXDModule()
